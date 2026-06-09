@@ -1,28 +1,20 @@
 class Animal:
     alive = []
 
-    def __init__(self, name: str) -> None:
+    def __init__(
+        self, name: str, health: int = 100, hidden: bool = False
+    ) -> None:
         self.name = name
-        self.health = 100
-        self.hidden = False
+        self.health = health
+        self.hidden = hidden
         Animal.alive.append(self)
 
     def __repr__(self) -> str:
-        return (
-            f"{{Name: {self.name}, "
-            f"Health: {self.health}, "
-            f"Hidden: {self.hidden}}}"
+        body = ", ".join(
+            f"{key.capitalize()}: {value}"
+            for key, value in self.__dict__.items()
         )
-
-    def _check_death(self) -> None:
-        if self.health <= 0:
-            self.health = 0
-            if self in Animal.alive:
-                Animal.alive.remove(self)
-
-    @classmethod
-    def __str__(cls) -> str:
-        return str(cls.alive)
+        return "{" + body + "}"
 
 
 class Herbivore(Animal):
@@ -32,7 +24,9 @@ class Herbivore(Animal):
 
 class Carnivore(Animal):
     @staticmethod
-    def bite(other: Animal) -> None:
-        if isinstance(other, Herbivore) and not other.hidden:
-            other.health -= 50
-            other._check_death()
+    def bite(animal: Animal) -> None:
+        if isinstance(animal, Herbivore) and not animal.hidden:
+            animal.health -= 50
+            if animal.health <= 0:
+                index_to_pop = Animal.alive.index(animal)
+                Animal.alive.pop(index_to_pop)
